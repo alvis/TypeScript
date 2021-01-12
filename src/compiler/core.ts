@@ -309,25 +309,25 @@ namespace ts {
      * Filters an array by a predicate function. Returns the same array instance if the predicate is
      * true for all elements, otherwise returns a new array instance containing the filtered subset.
      */
-    export function filter<T, U extends T>(array: T[], f: (x: T) => x is U): U[];
-    export function filter<T>(array: T[], f: (x: T) => boolean): T[];
-    export function filter<T, U extends T>(array: readonly T[], f: (x: T) => x is U): readonly U[];
-    export function filter<T, U extends T>(array: readonly T[], f: (x: T) => boolean): readonly T[];
-    export function filter<T, U extends T>(array: T[] | undefined, f: (x: T) => x is U): U[] | undefined;
-    export function filter<T>(array: T[] | undefined, f: (x: T) => boolean): T[] | undefined;
-    export function filter<T, U extends T>(array: readonly T[] | undefined, f: (x: T) => x is U): readonly U[] | undefined;
-    export function filter<T, U extends T>(array: readonly T[] | undefined, f: (x: T) => boolean): readonly T[] | undefined;
-    export function filter<T>(array: readonly T[] | undefined, f: (x: T) => boolean): readonly T[] | undefined {
+    export function filter<T, U extends T>(array: T[], f: (x: T, index: number) => x is U): U[];
+    export function filter<T>(array: T[], f: (x: T, index: number) => boolean): T[];
+    export function filter<T, U extends T>(array: readonly T[], f: (x: T, index: number) => x is U): readonly U[];
+    export function filter<T, U extends T>(array: readonly T[], f: (x: T, index: number) => boolean): readonly T[];
+    export function filter<T, U extends T>(array: T[] | undefined, f: (x: T, index: number) => x is U): U[] | undefined;
+    export function filter<T>(array: T[] | undefined, f: (x: T, index?: number) => boolean): T[] | undefined;
+    export function filter<T, U extends T>(array: readonly T[] | undefined, f: (x: T, index: number) => x is U): readonly U[] | undefined;
+    export function filter<T, U extends T>(array: readonly T[] | undefined, f: (x: T, index: number) => boolean): readonly T[] | undefined;
+    export function filter<T>(array: readonly T[] | undefined, f: (x: T, index: number) => boolean): readonly T[] | undefined {
         if (array) {
             const len = array.length;
             let i = 0;
-            while (i < len && f(array[i])) i++;
+            while (i < len && f(array[i], i)) i++;
             if (i < len) {
                 const result = array.slice(0, i);
                 i++;
                 while (i < len) {
                     const item = array[i];
-                    if (f(item)) {
+                    if (f(item, i)) {
                         result.push(item);
                     }
                     i++;

@@ -49,11 +49,11 @@ class Component {
 >this.props.thumbYProps!.elementRef(ref) : void
 >this.props.thumbYProps!.elementRef : ElementRef
 >this.props.thumbYProps! : ThumbProps
->this.props.thumbYProps : ThumbProps | undefined
+>this.props.thumbYProps : ThumbProps
 >this.props : ComponentProps
 >this : this
 >props : ComponentProps
->thumbYProps : ThumbProps | undefined
+>thumbYProps : ThumbProps
 >elementRef : ElementRef
 >ref : HTMLElement | null
 

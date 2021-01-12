@@ -1,0 +1,362 @@
+=== tests/cases/conformance/expressions/typeGuards/typeGuardAccordingToPropertyOptionalBySwitch.ts ===
+interface Foo1 {
+    key1: {
+>key1 : { key2: number; } | undefined
+
+        key2: number;
+>key2 : number
+
+    } | undefined;
+    f1: number;
+>f1 : number
+}
+
+interface Foo2 {
+    key1: {
+>key1 : { key2: string; } | undefined
+
+        key2: string
+>key2 : string
+
+    } | undefined;
+    f2: number;
+>f2 : number
+}
+
+interface Foo3 {
+    key1: {
+>key1 : { key2: number; }
+
+        key2: number;
+>key2 : number
+
+    };
+    f2: number;
+>f2 : number
+}
+
+type U1 = Foo1 | Foo2 | Foo3;
+>U1 : U1
+
+type U2 = Foo1 | Foo2 | Foo3 | undefined;
+>U2 : U2
+
+// unnecessary optional chain
+function f1(u: U1) {
+>f1 : (u: U1) => void
+>u : U1
+
+    switch (typeof u?.key1) {
+>typeof u?.key1 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+
+        case 'number':
+>'number' : "number"
+
+            u.key1.key2;
+>u.key1.key2 : any
+>u.key1 : any
+>u : never
+>key1 : any
+>key2 : any
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number
+
+            break;
+    }
+    switch (typeof u?.key1) {
+>typeof u?.key1 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+
+        case 'undefined':
+>'undefined' : "undefined"
+
+            u.key1.key2;
+>u.key1.key2 : any
+>u.key1 : undefined
+>u : U1
+>key1 : undefined
+>key2 : any
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>key2 : string | number
+
+            break;
+    }
+}
+
+// non-root optional chain
+function f2(u: U1) {
+>f2 : (u: U1) => void
+>u : U1
+
+    switch (typeof u.key1?.key2) {
+>typeof u.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u.key1?.key2 : string | number | undefined
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'number':
+>'number' : "number"
+
+            u.key1.key2;
+>u.key1.key2 : number
+>u.key1 : { key2: number; } | { key2: number; }
+>u : Foo1 | Foo3
+>key1 : { key2: number; } | { key2: number; }
+>key2 : number
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string
+
+            break;
+    }
+    switch (typeof u.key1?.key2) {
+>typeof u.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u.key1?.key2 : string | number | undefined
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'undefined':
+>'undefined' : "undefined"
+
+            u.key1.key2;
+>u.key1.key2 : never
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : never
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>key2 : string | number
+
+            break;
+    }
+}
+
+function f2Plus(u: U1) {
+>f2Plus : (u: U1) => void
+>u : U1
+
+    switch (typeof u.key1?.key2) {
+>typeof u.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u.key1?.key2 : string | number | undefined
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'number':
+>'number' : "number"
+
+        case 'undefined':
+>'undefined' : "undefined"
+
+            u.key1.key2;
+>u.key1.key2 : number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : number
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>key2 : string
+
+            break;
+    }
+    switch (typeof u.key1?.key2) {
+>typeof u.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u.key1?.key2 : string | number | undefined
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'bigint':
+>'bigint' : "bigint"
+
+            u.key1.key2;
+>u.key1.key2 : any
+>u.key1 : any
+>u : never
+>key1 : any
+>key2 : any
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number
+
+            break;
+    }
+}
+
+// root optional chain
+function f3(u: U2) {
+>f3 : (u: U2) => void
+>u : U2
+
+    switch (typeof u?.key1) {
+>typeof u?.key1 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+
+        case 'number':
+>'number' : "number"
+
+            u.key1.key2;
+>u.key1.key2 : any
+>u.key1 : any
+>u : never
+>key1 : any
+>key2 : any
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number
+
+            break;
+    }
+    switch (typeof u?.key1) {
+>typeof u?.key1 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+
+        case 'undefined':
+>'undefined' : "undefined"
+
+            u.key1.key2;
+>u.key1.key2 : any
+>u.key1 : undefined
+>u : U2
+>key1 : undefined
+>key2 : any
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>key2 : string | number
+
+            break;
+    }
+}
+
+// multi optional chain
+function f4(u: U2) {
+>f4 : (u: U2) => void
+>u : U2
+
+    switch (typeof u?.key1?.key2) {
+>typeof u?.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1?.key2 : string | number | undefined
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'number':
+>'number' : "number"
+
+            u.key1.key2;
+>u.key1.key2 : number
+>u.key1 : { key2: number; } | { key2: number; }
+>u : Foo1 | Foo3
+>key1 : { key2: number; } | { key2: number; }
+>key2 : number
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string
+
+            break;
+    }
+    switch (typeof u?.key1?.key2) {
+>typeof u?.key1?.key2 : "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"
+>u?.key1?.key2 : string | number | undefined
+>u?.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : string | number | undefined
+
+        case 'undefined':
+>'undefined' : "undefined"
+
+            u.key1.key2;
+>u.key1.key2 : never
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>u : U2
+>key1 : { key2: number; } | { key2: string; } | { key2: number; } | undefined
+>key2 : never
+
+            break;
+        default:
+            u.key1.key2;
+>u.key1.key2 : string | number
+>u.key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>u : U1
+>key1 : { key2: number; } | { key2: string; } | { key2: number; }
+>key2 : string | number
+
+            break;
+    }
+}
+
