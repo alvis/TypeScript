@@ -58,7 +58,7 @@ type K00 = keyof any;  // string
 >K00 : string | number | symbol
 
 type K01 = keyof string;  // "toString" | "charAt" | ...
->K01 : number | "length" | "toString" | "concat" | "slice" | "indexOf" | "lastIndexOf" | "valueOf" | "charAt" | "charCodeAt" | "localeCompare" | "match" | "replace" | "search" | "split" | "substring" | "toLowerCase" | "toLocaleLowerCase" | "toUpperCase" | "toLocaleUpperCase" | "trim" | "substr"
+>K01 : number | "length" | "toString" | "concat" | "slice" | "indexOf" | "lastIndexOf" | "charAt" | "charCodeAt" | "localeCompare" | "match" | "replace" | "search" | "split" | "substring" | "toLowerCase" | "toLocaleLowerCase" | "toUpperCase" | "toLocaleUpperCase" | "trim" | "substr" | "valueOf"
 
 type K02 = keyof number;  // "toString" | "toFixed" | "toExponential" | ...
 >K02 : "toString" | "toLocaleString" | "valueOf" | "toFixed" | "toExponential" | "toPrecision"
@@ -1065,8 +1065,8 @@ function f82() {
 >42 : 42
 }
 
-function f83<T extends { [x: string]: { x: any } }, K extends keyof T>(obj: T, key: K) {
->f83 : <T extends { [x: string]: { x: any; }; }, K extends keyof T>(obj: T, key: K) => T[K]["x"]
+function f83<T extends { [x: string]: { x: any } }, K extends string & keyof T>(obj: T, key: K) {
+>f83 : <T extends { [x: string]: { x: any; }; }, K extends string & keyof T>(obj: T, key: K) => T[K]["x"]
 >x : string
 >x : any
 >obj : T
@@ -1087,7 +1087,7 @@ function f84() {
     let x1 = f83({ foo: { x: "hello" } }, "foo");  // string
 >x1 : string
 >f83({ foo: { x: "hello" } }, "foo") : string
->f83 : <T extends { [x: string]: { x: any; }; }, K extends keyof T>(obj: T, key: K) => T[K]["x"]
+>f83 : <T extends { [x: string]: { x: any; }; }, K extends string & keyof T>(obj: T, key: K) => T[K]["x"]
 >{ foo: { x: "hello" } } : { foo: { x: string; }; }
 >foo : { x: string; }
 >{ x: "hello" } : { x: string; }
@@ -1098,7 +1098,7 @@ function f84() {
     let x2 = f83({ bar: { x: 42 } }, "bar");  // number
 >x2 : number
 >f83({ bar: { x: 42 } }, "bar") : number
->f83 : <T extends { [x: string]: { x: any; }; }, K extends keyof T>(obj: T, key: K) => T[K]["x"]
+>f83 : <T extends { [x: string]: { x: any; }; }, K extends string & keyof T>(obj: T, key: K) => T[K]["x"]
 >{ bar: { x: 42 } } : { bar: { x: number; }; }
 >bar : { x: number; }
 >{ x: 42 } : { x: number; }
@@ -1775,8 +1775,8 @@ function updateIds<T extends Record<K, string>, K extends string>(
 
 // Repro from #13285
 
-function updateIds2<T extends { [x: string]: string }, K extends keyof T>(
->updateIds2 : <T extends { [x: string]: string; }, K extends keyof T>(obj: T, key: K, stringMap: { [oldId: string]: string; }) => void
+function updateIds2<T extends { [x: string]: string }, K extends string & keyof T>(
+>updateIds2 : <T extends { [x: string]: string; }, K extends string & keyof T>(obj: T, key: K, stringMap: { [oldId: string]: string; }) => void
 >x : string
 
     obj: T,

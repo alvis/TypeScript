@@ -54,8 +54,7 @@ namespace ts {
         getApparentProperties(): Symbol[];
         getCallSignatures(): readonly Signature[];
         getConstructSignatures(): readonly Signature[];
-        getStringIndexType(): Type | undefined;
-        getNumberIndexType(): Type | undefined;
+        getTypeIndexedByType(indexType: Type): Type | undefined;
         getBaseTypes(): BaseType[] | undefined;
         getNonNullableType(): Type;
         /*@internal*/ getNonOptionalType(): Type;
@@ -300,6 +299,8 @@ namespace ts {
         getSourceFileLike?(fileName: string): SourceFileLike | undefined;
         /* @internal */
         getPackageJsonsVisibleToFile?(fileName: string, rootDir?: string): readonly PackageJsonInfo[];
+        /* @internal */
+        getNearestAncestorDirectoryWithPackageJson?(fileName: string): string | undefined;
         /* @internal */
         getPackageJsonsForAutoImport?(rootDir?: string): readonly PackageJsonInfo[];
         /* @internal */

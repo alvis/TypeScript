@@ -186,14 +186,14 @@ export interface T {
 export interface U extends T {
 }
 export interface V extends T {
-    [idx: string]: string;
+    [x: string | number]: string;
 }
 export interface W extends T {
     [idx: number]: "ok";
 }
 export interface X extends T {
-    [idx: string]: string;
     [idx: number]: "ok";
+    [idx: string]: string;
 }
 export interface Y {
     [idx: string]: {

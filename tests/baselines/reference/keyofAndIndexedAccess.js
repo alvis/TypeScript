@@ -266,7 +266,7 @@ function f82() {
     let x2 = f81({ a: { x: 42 } });  // number
 }
 
-function f83<T extends { [x: string]: { x: any } }, K extends keyof T>(obj: T, key: K) {
+function f83<T extends { [x: string]: { x: any } }, K extends string & keyof T>(obj: T, key: K) {
     return obj[key]['x'] as T[K]['x'];
 }
 
@@ -498,7 +498,7 @@ function updateIds<T extends Record<K, string>, K extends string>(
 
 // Repro from #13285
 
-function updateIds2<T extends { [x: string]: string }, K extends keyof T>(
+function updateIds2<T extends { [x: string]: string }, K extends string & keyof T>(
     obj: T,
     key: K,
     stringMap: { [oldId: string]: string }
@@ -667,6 +667,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -1221,7 +1223,7 @@ declare function f83<T extends {
     [x: string]: {
         x: any;
     };
-}, K extends keyof T>(obj: T, key: K): T[K]["x"];
+}, K extends string & keyof T>(obj: T, key: K): T[K]["x"];
 declare function f84(): void;
 declare class C1 {
     x: number;
@@ -1324,7 +1326,7 @@ declare function onChangeGenericFunction<T>(handler: Handler<T & {
 declare function updateIds<T extends Record<K, string>, K extends string>(obj: T, idFields: K[], idMapping: Partial<Record<T[K], T[K]>>): Record<K, string>;
 declare function updateIds2<T extends {
     [x: string]: string;
-}, K extends keyof T>(obj: T, key: K, stringMap: {
+}, K extends string & keyof T>(obj: T, key: K, stringMap: {
     [oldId: string]: string;
 }): void;
 declare function head<T extends Array<any>>(list: T): T[0];

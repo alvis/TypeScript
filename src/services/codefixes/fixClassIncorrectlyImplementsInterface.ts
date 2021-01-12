@@ -56,21 +56,20 @@ namespace ts.codefix {
         const classType = checker.getTypeAtLocation(classDeclaration);
         const constructor = find(classDeclaration.members, m => isConstructorDeclaration(m));
 
-        if (!classType.getNumberIndexType()) {
-            createMissingIndexSignatureDeclaration(implementedType, IndexKind.Number);
-        }
-        if (!classType.getStringIndexType()) {
-            createMissingIndexSignatureDeclaration(implementedType, IndexKind.String);
-        }
+        createMissingIndexSignatureDeclarations(implementedType, classType);
 
         const importAdder = createImportAdder(sourceFile, context.program, preferences, context.host);
         createMissingMemberNodes(classDeclaration, nonPrivateAndNotExistedInHeritageClauseMembers, sourceFile, context, preferences, importAdder, member => insertInterfaceMemberNode(sourceFile, classDeclaration, member));
         importAdder.writeFixes(changeTracker);
 
-        function createMissingIndexSignatureDeclaration(type: InterfaceType, kind: IndexKind): void {
-            const indexInfoOfKind = checker.getIndexInfoOfType(type, kind);
-            if (indexInfoOfKind) {
-                insertInterfaceMemberNode(sourceFile, classDeclaration, checker.indexInfoToIndexSignatureDeclaration(indexInfoOfKind, kind, classDeclaration, /*flags*/ undefined, getNoopSymbolTrackerWithResolver(context))!);
+        function createMissingIndexSignatureDeclarations(type: InterfaceType, implementingType: Type): void {
+            const indexInfos = checker.getIndexInfosOfType(type);
+            if (indexInfos) {
+                for (const info of indexInfos) {
+                    if (!checker.getIndexTypeOfType(implementingType, info.indexType)) {
+                        changeTracker.insertNodeAtClassStart(sourceFile, classDeclaration, checker.indexInfoToIndexSignatureDeclaration(info, classDeclaration, /*flags*/ undefined, getNoopSymbolTrackerWithResolver(context))!);
+                    }
+                }
             }
         }
 

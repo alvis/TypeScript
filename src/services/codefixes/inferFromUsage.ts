@@ -337,17 +337,46 @@ namespace ts.codefix {
         if (!signature) {
             return;
         }
-        const paramTags = mapDefined(parameterInferences, inference => {
+
+        const inferences = mapDefined(parameterInferences, inference => {
             const param = inference.declaration;
             // only infer parameters that have (1) no type and (2) an accessible inferred type
-            if (param.initializer || getJSDocType(param) || !isIdentifier(param.name)) return;
-
+            if (param.initializer || getJSDocType(param) || !isIdentifier(param.name)) {
+                return;
+            }
             const typeNode = inference.type && getTypeNodeIfAccessible(inference.type, param, program, host);
-            const name = factory.cloneNode(param.name);
-            setEmitFlags(name, EmitFlags.NoComments | EmitFlags.NoNestedComments);
-            return typeNode && factory.createJSDocParameterTag(/*tagName*/ undefined, name, /*isBracketed*/ !!inference.isOptional, factory.createJSDocTypeExpression(typeNode), /* isNameFirst */ false, "");
+            if (typeNode) {
+                const name = factory.cloneNode(param.name);
+                setEmitFlags(name, EmitFlags.NoComments | EmitFlags.NoNestedComments);
+                return { name: factory.cloneNode(param.name), param, isOptional: !!inference.isOptional, typeNode };
+            }
         });
-        addJSDocTags(changes, sourceFile, signature, paramTags);
+
+        if (!inferences.length) {
+            return;
+        }
+
+        if (isArrowFunction(signature) || isFunctionExpression(signature)) {
+            const needParens = isArrowFunction(signature) && !findChildOfKind(signature, SyntaxKind.OpenParenToken, sourceFile);
+            if (needParens) {
+                changes.insertNodeBefore(sourceFile, first(signature.parameters), factory.createToken(SyntaxKind.OpenParenToken));
+            }
+
+            forEach(inferences, ({ typeNode, param }) => {
+                const typeTag = factory.createJSDocTypeTag(/*tagName*/ undefined, factory.createJSDocTypeExpression(typeNode));
+                const jsDoc = factory.createJSDocComment(/*comment*/ undefined, [typeTag]);
+                changes.insertNodeAt(sourceFile, param.getStart(sourceFile), jsDoc, { suffix: " " });
+            });
+
+            if (needParens) {
+                changes.insertNodeAfter(sourceFile, last(signature.parameters), factory.createToken(SyntaxKind.CloseParenToken));
+            }
+        }
+        else {
+            const paramTags = map(inferences, ({ name, typeNode, isOptional }) =>
+                factory.createJSDocParameterTag(/*tagName*/ undefined, name, /*isBracketed*/ !!isOptional, factory.createJSDocTypeExpression(typeNode), /* isNameFirst */ false, ""));
+            addJSDocTags(changes, sourceFile, signature, paramTags);
+        }
     }
 
     export function addJSDocTags(changes: textChanges.ChangeTracker, sourceFile: SourceFile, parent: HasJSDoc, newTags: readonly JSDocTag[]): void {
@@ -913,10 +942,7 @@ namespace ts.codefix {
             }
             const calls = [];
             const constructs = [];
-            const stringIndices = [];
-            const numberIndices = [];
-            let stringIndexReadonly = false;
-            let numberIndexReadonly = false;
+            const indicies = [];
             const props = createMultiMap<Type>();
             for (const anon of anons) {
                 for (const p of checker.getPropertiesOfType(anon)) {
@@ -924,13 +950,8 @@ namespace ts.codefix {
                 }
                 calls.push(...checker.getSignaturesOfType(anon, SignatureKind.Call));
                 constructs.push(...checker.getSignaturesOfType(anon, SignatureKind.Construct));
-                if (anon.stringIndexInfo) {
-                    stringIndices.push(anon.stringIndexInfo.type);
-                    stringIndexReadonly = stringIndexReadonly || anon.stringIndexInfo.isReadonly;
-                }
-                if (anon.numberIndexInfo) {
-                    numberIndices.push(anon.numberIndexInfo.type);
-                    numberIndexReadonly = numberIndexReadonly || anon.numberIndexInfo.isReadonly;
+                if (anon.indexInfos) {
+                    indicies.push(...anon.indexInfos);
                 }
             }
             const members = mapEntries(props, (name, types) => {
@@ -944,8 +965,7 @@ namespace ts.codefix {
                 members as UnderscoreEscapedMap<TransientSymbol>,
                 calls,
                 constructs,
-                stringIndices.length ? checker.createIndexInfo(checker.getUnionType(stringIndices), stringIndexReadonly) : undefined,
-                numberIndices.length ? checker.createIndexInfo(checker.getUnionType(numberIndices), numberIndexReadonly) : undefined);
+                indicies);
         }
 
         function inferTypes(usage: Usage): Type[] {
@@ -984,7 +1004,7 @@ namespace ts.codefix {
             }
             const callSignatures: Signature[] = usage.calls ? [getSignatureFromCalls(usage.calls)] : [];
             const constructSignatures: Signature[] = usage.constructs ? [getSignatureFromCalls(usage.constructs)] : [];
-            const stringIndexInfo = usage.stringIndex && checker.createIndexInfo(combineFromUsage(usage.stringIndex), /*isReadonly*/ false);
+            const stringIndexInfo = usage.stringIndex && checker.createIndexInfo(checker.getStringType(), combineFromUsage(usage.stringIndex), /*isReadonly*/ false);
             return checker.createAnonymousType(/*symbol*/ undefined, members, callSignatures, constructSignatures, stringIndexInfo, /*numberIndexInfo*/ undefined);
         }
 

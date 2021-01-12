@@ -351,7 +351,7 @@ export interface EntityState<E extends Entity> {
 >ids : IdOf<E>[]
 
     entities: { [key: string]: E, [key: number]: E };
->entities : { [key: string]: E; [key: number]: E; }
+>entities : { [x: string | number]: E; }
 >key : string
 >key : number
 }
@@ -363,18 +363,18 @@ export function getAllEntities<E extends Entity>(state: EntityState<E>): E[] {
 
     const { ids, entities } = state;
 >ids : IdOf<E>[]
->entities : { [key: string]: E; [key: number]: E; }
+>entities : { [x: string | number]: E; }
 >state : EntityState<E>
 
     return ids.map(id => entities[id]);
->ids.map(id => entities[id]) : { [key: string]: E; [key: number]: E; }[IdOf<E>][]
+>ids.map(id => entities[id]) : { [x: string | number]: E; }[IdOf<E>][]
 >ids.map : <U>(callbackfn: (value: IdOf<E>, index: number, array: IdOf<E>[]) => U, thisArg?: any) => U[]
 >ids : IdOf<E>[]
 >map : <U>(callbackfn: (value: IdOf<E>, index: number, array: IdOf<E>[]) => U, thisArg?: any) => U[]
->id => entities[id] : (id: IdOf<E>) => { [key: string]: E; [key: number]: E; }[IdOf<E>]
+>id => entities[id] : (id: IdOf<E>) => { [x: string | number]: E; }[IdOf<E>]
 >id : IdOf<E>
->entities[id] : { [key: string]: E; [key: number]: E; }[IdOf<E>]
->entities : { [key: string]: E; [key: number]: E; }
+>entities[id] : { [x: string | number]: E; }[IdOf<E>]
+>entities : { [x: string | number]: E; }
 >id : IdOf<E>
 }
 
@@ -385,7 +385,7 @@ export function getEntity<E extends Entity>(id: IdOf<E>, state: EntityState<E>):
 
     const { ids, entities } = state;
 >ids : IdOf<E>[]
->entities : { [key: string]: E; [key: number]: E; }
+>entities : { [x: string | number]: E; }
 >state : EntityState<E>
 
     if (!ids.includes(id)) {
@@ -401,8 +401,8 @@ export function getEntity<E extends Entity>(id: IdOf<E>, state: EntityState<E>):
     }
 
     return entities[id];
->entities[id] : { [key: string]: E; [key: number]: E; }[IdOf<E>]
->entities : { [key: string]: E; [key: number]: E; }
+>entities[id] : { [x: string | number]: E; }[IdOf<E>]
+>entities : { [x: string | number]: E; }
 >id : IdOf<E>
 }
 
@@ -526,13 +526,13 @@ export class c {
 
 // Repro from #31385
 
-type Foo<T> = { [key: string]: { [K in keyof T]: K }[keyof T] };
+type Foo<T> = { [key: PropertyKey]: { [K in keyof T]: K }[keyof T] };
 >Foo : Foo<T>
->key : string
+>key : string | number | symbol
 
-type Bar<T> = { [key: string]: { [K in keyof T]: [K] }[keyof T] };
+type Bar<T> = { [key: PropertyKey]: { [K in keyof T]: [K] }[keyof T] };
 >Bar : Bar<T>
->key : string
+>key : string | number | symbol
 
 type Baz<T, Q extends Foo<T>> = { [K in keyof Q]: T[Q[K]] };
 >Baz : Baz<T, Q>
