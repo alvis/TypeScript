@@ -171,6 +171,22 @@ namespace ts {
             return value;
         }
 
+        export function flagCheckerImmutableObject<T extends object>(object: T): T {
+            if (isDebugging) {
+                Object.defineProperties(object, {
+                    __debugImmutable: {
+                        value: true
+                    }
+                });
+            }
+            return object;
+        }
+
+        export function assertMutable<T extends object>(object: T): T {
+            assert(!(object as any).__debugImmutable, "Object is flagged as checker-immutable, but is used in a position requiring mutation");
+            return object;
+        }
+
         /**
          * @deprecated Use `checkDefined` to check whether a value is defined inline. Use `assertIsDefined` to check whether
          * a value is defined at the statement level.

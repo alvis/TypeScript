@@ -82,6 +82,8 @@ var __extends = (this && this.__extends) || (function () {
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -247,14 +249,14 @@ export class T {
 export class U extends T {
 }
 export class V extends T {
-    [idx: string]: string;
+    [x: string | number]: string;
 }
 export class W extends T {
     [idx: number]: "ok";
 }
 export class X extends T {
-    [idx: string]: string;
     [idx: number]: "ok";
+    [idx: string]: string;
 }
 export class Y {
     [idx: string]: {

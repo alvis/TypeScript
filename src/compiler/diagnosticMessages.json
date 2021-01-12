@@ -75,7 +75,7 @@
         "category": "Error",
         "code": 1022
     },
-    "An index signature parameter type must be either 'string' or 'number'.": {
+    "An index signature parameter type must be assignable to 'string | number | symbol'.": {
         "category": "Error",
         "code": 1023
     },
@@ -980,14 +980,6 @@
         "category": "Error",
         "code": 1335
     },
-    "An index signature parameter type cannot be a type alias. Consider writing '[{0}: {1}]: {2}' instead.": {
-        "category": "Error",
-        "code": 1336
-    },
-    "An index signature parameter type cannot be a union type. Consider using a mapped object type instead.": {
-        "category": "Error",
-        "code": 1337
-    },
     "'infer' declarations are only permitted in the 'extends' clause of a conditional type.": {
         "category": "Error",
         "code": 1338
@@ -1112,11 +1104,7 @@
         "category": "Message",
         "code": 1369
     },
-    "Only ECMAScript imports may use 'import type'.": {
-        "category": "Error",
-        "code": 1370
-    },
-    "This import is never used as a value and must use 'import type' because the 'importsNotUsedAsValues' is set to 'error'.": {
+    "This import is never used as a value and must use 'import type' because 'importsNotUsedAsValues' is set to 'error'.": {
         "category": "Error",
         "code": 1371
     },
@@ -1187,6 +1175,18 @@
     "'{0}' is not allowed as a variable declaration name.": {
         "category": "Error",
         "code": 1389
+    },
+    "Provides a root package name when using outFile with declarations.": {
+        "category": "Message",
+        "code": 1390
+    },
+    "The `bundledPackageName` option must be provided when using outFile and node module resolution with declaration emit.": {
+        "category": "Error",
+        "code": 1391
+    },
+    "An import alias cannot use 'import type'": {
+        "category": "Error",
+        "code": 1392
     },
     "The types of '{0}' are incompatible between these types.": {
         "category": "Error",
@@ -1337,7 +1337,7 @@
         "category": "Error",
         "code": 2329
     },
-    "Index signatures are incompatible.": {
+    "'{0}' and '{1}' index signatures are incompatible.": {
         "category": "Error",
         "code": 2330
     },
@@ -1661,15 +1661,11 @@
         "category": "Error",
         "code": 2410
     },
-    "Property '{0}' of type '{1}' is not assignable to string index type '{2}'.": {
+    "Property '{0}' of type '{1}' is not assignable to '{2}' index type '{3}'.": {
         "category": "Error",
         "code": 2411
     },
-    "Property '{0}' of type '{1}' is not assignable to numeric index type '{2}'.": {
-        "category": "Error",
-        "code": 2412
-    },
-    "Numeric index type '{0}' is not assignable to string index type '{1}'.": {
+    "'{0}' index type '{1}' is not assignable to '{2}' index type '{3}'.": {
         "category": "Error",
         "code": 2413
     },
@@ -2285,7 +2281,7 @@
         "category": "Error",
         "code": 2575
     },
-    "Property '{0}' is a static member of type '{1}'.": {
+    "Property '{0}' does not exist on type '{1}'. Did you mean to access the static member '{2}' instead?": {
         "category": "Error",
         "code": 2576
     },
@@ -2464,6 +2460,10 @@
     "Element at index {0} is variadic in one type but not in the other.": {
         "category": "Error",
         "code": 2622
+    },
+    "'{0}' index signatures are incompatible.": {
+        "category": "Error",
+        "code": 2623
     },
 
     "Cannot augment module '{0}' with value exports because it resolves to a non-module entity.": {
@@ -3419,6 +3419,10 @@
     "Tuple type arguments circularly reference themselves.": {
         "category": "Error",
         "code": 4110
+    },
+    "Property '{0}' comes from an index signature, so it must be accessed with ['{0}'].": {
+        "category": "Error",
+        "code": 4111
     },
 
     "The current host does not support the '{0}' option.": {
@@ -4736,6 +4740,10 @@
         "category": "Error",
         "code": 6504
     },
+    "Require undeclared properties from index signatures to use element accesses.": {
+        "category": "Error",
+        "code": 6803
+    },
 
     "Include 'undefined' in index signature results": {
         "category": "Message",
@@ -5950,6 +5958,22 @@
     "Add 'void' to all Promises resolved without a value": {
         "category": "Message",
         "code": 95144
+    },
+    "Use element access for '{0}'": {
+        "category": "Message",
+        "code": 95145
+    },
+    "Use element access for all undeclared properties.": {
+        "category": "Message",
+        "code": 95146
+    },
+    "Delete all unused imports": {
+        "category": "Message",
+        "code": 95147
+    },
+    "Infer function return type": {
+        "category": "Message",
+        "code": 95148
     },
 
     "No value exists in scope for the shorthand property '{0}'. Either declare one or provide an initializer.": {

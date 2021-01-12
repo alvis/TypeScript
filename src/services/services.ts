@@ -443,11 +443,8 @@ namespace ts {
         getConstructSignatures(): readonly Signature[] {
             return this.checker.getSignaturesOfType(this, SignatureKind.Construct);
         }
-        getStringIndexType(): Type | undefined {
-            return this.checker.getIndexTypeOfType(this, IndexKind.String);
-        }
-        getNumberIndexType(): Type | undefined {
-            return this.checker.getIndexTypeOfType(this, IndexKind.Number);
+        getTypeIndexedByType(indexType: Type): Type | undefined {
+            return this.checker.getIndexTypeOfType(this, indexType);
         }
         getBaseTypes(): BaseType[] | undefined {
             return this.isClassOrInterface() ? this.checker.getBaseTypes(this) : undefined;
@@ -1126,16 +1123,22 @@ namespace ts {
         return createLanguageServiceSourceFile(sourceFile.fileName, scriptSnapshot, sourceFile.languageVersion, version, /*setNodeParents*/ true, sourceFile.scriptKind);
     }
 
+    const NoopCancellationToken: CancellationToken = {
+        isCancellationRequested: returnFalse,
+        throwIfCancellationRequested: noop,
+    };
+
     class CancellationTokenObject implements CancellationToken {
-        constructor(private cancellationToken: HostCancellationToken | undefined) {
+        constructor(private cancellationToken: HostCancellationToken) {
         }
 
         public isCancellationRequested(): boolean {
-            return !!this.cancellationToken && this.cancellationToken.isCancellationRequested();
+            return this.cancellationToken.isCancellationRequested();
         }
 
         public throwIfCancellationRequested(): void {
             if (this.isCancellationRequested()) {
+                tracing.instant(tracing.Phase.Session, "cancellationThrown", { kind: "CancellationTokenObject" });
                 throw new OperationCanceledException();
             }
         }
@@ -1166,6 +1169,7 @@ namespace ts {
 
         public throwIfCancellationRequested(): void {
             if (this.isCancellationRequested()) {
+                tracing.instant(tracing.Phase.Session, "cancellationThrown", { kind: "ThrottledCancellationToken" });
                 throw new OperationCanceledException();
             }
         }
@@ -1233,7 +1237,9 @@ namespace ts {
         let lastProjectVersion: string;
         let lastTypesRootVersion = 0;
 
-        const cancellationToken = new CancellationTokenObject(host.getCancellationToken && host.getCancellationToken());
+        const cancellationToken = host.getCancellationToken
+            ? new CancellationTokenObject(host.getCancellationToken())
+            : NoopCancellationToken;
 
         const currentDirectory = host.getCurrentDirectory();
         // Check if the localized messages json is set, otherwise query the host for it
@@ -1598,7 +1604,7 @@ namespace ts {
             );
             return {
                 kind: symbolKind,
-                kindModifiers: SymbolDisplay.getSymbolModifiers(symbol),
+                kindModifiers: SymbolDisplay.getSymbolModifiers(typeChecker, symbol),
                 textSpan: createTextSpanFromNode(nodeForQuickInfo, sourceFile),
                 displayParts,
                 documentation,

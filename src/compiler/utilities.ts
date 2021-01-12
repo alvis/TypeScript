@@ -616,15 +616,13 @@ namespace ts {
         NeverAsciiEscape = 1 << 0,
         JsxAttributeEscape = 1 << 1,
         TerminateUnterminatedLiterals = 1 << 2,
+        AllowNumericSeparator = 1 << 3
     }
 
     export function getLiteralText(node: LiteralLikeNode, sourceFile: SourceFile, flags: GetLiteralTextFlags) {
         // If we don't need to downlevel and we can reach the original source text using
         // the node's parent reference, then simply get the text as it was originally written.
-        if (!nodeIsSynthesized(node) && node.parent && !(flags & GetLiteralTextFlags.TerminateUnterminatedLiterals && node.isUnterminated) && !(
-            (isNumericLiteral(node) && node.numericLiteralFlags & TokenFlags.ContainsSeparator) ||
-            isBigIntLiteral(node)
-        )) {
+        if (canUseOriginalText(node, flags)) {
             return getSourceTextOfNodeFromSourceFile(sourceFile, node);
         }
 
@@ -675,6 +673,18 @@ namespace ts {
         }
 
         return Debug.fail(`Literal kind '${node.kind}' not accounted for.`);
+    }
+
+    function canUseOriginalText(node: LiteralLikeNode, flags: GetLiteralTextFlags): boolean {
+        if (nodeIsSynthesized(node) || !node.parent || (flags & GetLiteralTextFlags.TerminateUnterminatedLiterals && node.isUnterminated)) {
+            return false;
+        }
+
+        if (isNumericLiteral(node) && node.numericLiteralFlags & TokenFlags.ContainsSeparator) {
+            return !!(flags & GetLiteralTextFlags.AllowNumericSeparator);
+        }
+
+        return !isBigIntLiteral(node);
     }
 
     export function getTextOfConstantValue(value: string | number) {
@@ -3856,7 +3866,7 @@ namespace ts {
 
     export function isIntrinsicJsxName(name: __String | string) {
         const ch = (name as string).charCodeAt(0);
-        return (ch >= CharacterCodes.a && ch <= CharacterCodes.z) || stringContains((name as string), "-");
+        return (ch >= CharacterCodes.a && ch <= CharacterCodes.z) || stringContains((name as string), "-") || stringContains((name as string), ":");
     }
 
     const indentStrings: string[] = ["", "    "];
@@ -6711,9 +6721,11 @@ namespace ts {
         return { pos: getTokenPosOfNode(node), end: node.end };
     }
 
-    export function rangeOfTypeParameters(typeParameters: NodeArray<TypeParameterDeclaration>): TextRange {
+    export function rangeOfTypeParameters(sourceFile: SourceFile, typeParameters: NodeArray<TypeParameterDeclaration>): TextRange {
         // Include the `<>`
-        return { pos: typeParameters.pos - 1, end: typeParameters.end + 1 };
+        const pos = typeParameters.pos - 1;
+        const end = skipTrivia(sourceFile.text, typeParameters.end) + 1;
+        return { pos, end };
     }
 
     export interface HostWithIsSourceOfProjectReferenceRedirect {
